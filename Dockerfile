@@ -1,17 +1,8 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 # Faster/cleaner Python
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
-
-# System deps needed for some wheels (cffi/cryptography/grpc)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       ca-certificates \
-       build-essential \
-       libffi-dev \
-       libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
