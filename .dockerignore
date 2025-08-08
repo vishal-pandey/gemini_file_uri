@@ -1,0 +1,28 @@
+# VCS
+.git
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Envs
+.venv
+venv
+.env
+
+# OS/IDE
+.DS_Store
+.idea/
+.vscode/
+
+# App temp
+temp_gemini_uploads/
+
+# Others
+*.log
+pytest.cache/
+.mypy_cache/
