@@ -28,6 +28,11 @@ ALLOWED_MIME_TYPES = [
 
 app = FastAPI(title="Gemini File Uploader API")
 
+# Health / root endpoint
+@app.get("/", tags=["health"])
+async def health_root():
+    return {"status": "ok"}
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -76,6 +81,7 @@ async def upload_files_to_gemini(files: List[UploadFile] = File(...)):
 
 
     for file in files:
+        temp_file_path = None  # Initialize for this iteration to avoid unbound reference in finally
         if file.content_type not in ALLOWED_MIME_TYPES:
             # Clean up any temp files created so far in this request before raising
             for temp_path in temp_file_paths:
@@ -131,15 +137,14 @@ async def upload_files_to_gemini(files: List[UploadFile] = File(...)):
                     os.remove(temp_path)
             raise HTTPException(status_code=500, detail=f"Error processing file '{file.filename}': {str(e)}")
         finally:
-            # Clean up the specific temporary file after attempting upload or if an error occurred for this file
-            if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+            if temp_file_path and os.path.exists(temp_file_path):
                 try:
                     os.remove(temp_file_path)
                     if temp_file_path in temp_file_paths: # Remove from list if successfully deleted
                         temp_file_paths.remove(temp_file_path)
                 except OSError as e:
                     print(f"Error deleting temporary file {temp_file_path}: {e}")
-    
+
     if not processed_files_details:
         # This case might occur if all files failed individual processing steps
         # but didn't raise an exception that terminated the whole request early.
