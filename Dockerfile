@@ -1,8 +1,31 @@
-FROM python:3.11
+# Fixed Dockerfile with proper SSL and networking setup
+FROM python:3.12
 
-# Faster/cleaner Python
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies including CA certificates and SSL tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    wget \
+    openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
+
+# Create a non-root user for security
+# RUN useradd --create-home --shell /bin/bash app && \
+#     chown -R app:app /app
+# USER app
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PATH="/home/app/.local/bin:${PATH}"
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
 
 WORKDIR /app
 
